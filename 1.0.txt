@@ -1,0 +1,105 @@
+我来帮你审查这份 MemWal Studio 的 SPEC 文档。但在给出审查意见前，我需要先核实几个关键技术事实——因为这份 spec 的夺冠逻辑高度依赖"Walrus Memory / MemWal"这个概念是否真实存在、API 如何工作，以及 Walrus 赛道的实际评审要求。这些是 spec 里反复出现但需要外部验证的核心假设。
+
+让我先查证这些关键信息。好消息：MemWal 是真实存在的产品，且 spec 的核心假设基本成立。但有几个关键事实需要纠正你 spec 里的假设。让我再核实一下 MemWal SDK 的实际 API 形态和 Walrus 赛道的具体评审细节。我已经掌握了足够的事实来做一次扎实的 spec 审查。下面是核心发现和针对 `SPEC.md` 的完整审查意见。
+
+---
+
+## 一、关键事实核查结论（这些直接决定 spec 是否站得住）
+
+**1. MemWal 是真实产品，但与你 spec 的假设有重要差异**
+
+你的 spec 把 MemWal 当作一个可以让你自由定义 `memory.write()` / `memory.search()` / `memWalMemoryId` 的底层。实际上 MemWal SDK 是一个开发者工具包，把持久化、加密的记忆存在 Walrus 去中心化基础设施上，并在其上叠加语义检索，让 agent 能智能查询自己的记忆。更重要的是它已经**自带了你 spec 里想自己造的很多东西**：该 SDK 已经集成了 Vercel AI SDK，还为名为 OpenClaw 和 NemoClaw 的框架提供插件，并配有快速上手指南和完整文档，目前处于 beta 阶段。
+
+这是 spec 最大的战略隐患：**你打算"给 agent 接 Walrus/MemWal 记忆"，但 MemWal 本身就是干这个的。** 如果你只是再包一层 SDK，评委（很可能就是 MemWal 团队本身）会觉得你重复造轮子。这点必须在 spec 里正面处理（见下文第二节的核心修改建议）。
+
+**2. 架构事实需要写进 spec**：MemWal 通过 SDK 把 agent 连到一个后端 relayer，再接到 Walrus 存数据、Sui 管所有权和访问。也就是说，"Walrus 存 blob + Sui 管 ownership/access"这个分层是官方既定架构，你的 spec 第 9 节 Move object 设计方向是对的，但要明确你是**复用 MemWal 的这套机制还是自建**——不能含糊。
+
+**3. 四大支柱必须成为评分锚点**：MemWal 团队强调的四大支柱是可验证性、可用性、可移植性和可共享性——可验证性指能确认记忆未被篡改，可用性指即使某个提供商下线记忆仍存在，可移植性指记忆能在不同模型和厂商间迁移。你 spec 第 2.3 节的五条夺冠标准没有显式对齐这四个官方关键词，这是失分点。
+
+**4. Seal 加密不该是"如果有时间再做"的可选项**——它是 Walrus 赛道差异化的核心武器。Seal 是一个去中心化密钥管理服务，依赖 Sui 上定义和验证的访问控制策略，让开发者用它来保护存储在 Walrus 等去中心化存储上的静态敏感数据。而且 访问策略是写成 Sui 上的 Move 模块的。这意味着你 spec 第 9 节的 Move access object 和第 12.3 节的加密信封**应该合并成一条真实的 Seal 链路**，而不是各自独立的半成品。
+
+**5. 赛道定位核查**：官方对 Walrus 赛道的描述是 专项赛道：利用 Walrus 构建处理大型、链下或可验证数据的应用，且 Walrus 支持构建大型、链下、可验证数据的团队——AI 记忆层、媒体存储、链上金融基础设施。AI 记忆层被官方点名，方向正确。
+
+**6. 竞争现实**：一个记忆原生产品的新品类正在出现，包括 Mem0 和 Zep 这类提供专有架构来管理情景式和结构化记忆的方案。评委见过这些产品，你的 spec 必须解释为什么链上可验证记忆不是"Mem0 套个钱包"。
+
+---
+
+## 二、对 SPEC.md 的逐项审查与修改建议
+
+### 🔴 必须修改（不改会被降级）
+
+**1. 第 1、2 节：缺少"为什么不是又一个 MemWal 包装层"的防御论证**
+
+这是致命缺口。你的产品定位是"给 agent 接记忆"，但 MemWal 已经做了这件事。建议把产品 thesis 重写为：**MemWal Studio 不是又一个记忆 SDK，而是 MemWal 之上缺失的"可观测性 + 治理 + 审计"层**。类比：MemWal 是数据库，你做的是数据库的 GUI/DevTools/审计台。修改动作：
+
+- 在第 2.2 节"What This Is Not"里**新增一条**：`Not a competing memory SDK — it builds on MemWal, not around it.`
+- 第 4 节 demo 里，Research Agent 的记忆写入必须**真实调用 MemWal SDK**（用它的 Vercel AI SDK 集成），而不是你自己的 `writeMemory()`。你的 `MemoryStorageAdapter` 应该有一个 `MemWalStorageAdapter` 是真实调 MemWal，而不是占位。
+
+**2. 第 5.2 + 12.3 节：把 Seal 从"可选"提升为"夺冠版必做核心链路"**
+
+当前 spec 把加密信封写成"if time is short 可以只做 metadata"。这会让你失去 Walrus 赛道最强的差异化。建议：
+
+- 第 9 节 Move 合约的 `AccessGrant` 应直接作为 **Seal 的 `seal_approve` 策略来源**。也就是 agent B 能不能读，由你的 Move 策略决定，Seal 据此放发解密密钥。这才是 在数据边界强制执行——数据默认加密，直到策略允许，策略是你可控可审计的代码，审批可记录在 Walrus 上 的正确用法。
+- 把"revoke 后 agent B 读不到"从**前端假拦截**升级为**真实拦截**：revoke 后 Seal 策略不再批准，密钥不下发。当前 spec 第 6.2 节"After revocation, UI blocks simulated reads"这种"UI 模拟拦截"是评委最反感的伪安全。
+
+**3. 第 6.3 节 `reasoning_summary` 与 MemWal 语义检索冲突**
+
+你定义了 9 种 memory type 和自己的 `searchMemory` 关键词过滤。但 MemWal 让 agent 不只是把信息倒进一团文本，而是能基于含义而非精确关键词匹配来智能查询自己的记忆。你的 spec 用的是关键词 + tag 过滤，**比 MemWal 原生能力还弱**。修改：要么直接复用 MemWal 的语义检索并在 UI 里可视化它的检索过程（这反而是很强的"memory inspector"卖点），要么明确说明你的过滤是检索之上的"审计视图"，不替代语义检索。
+
+**4. 第 11.1 节 StorageMode 三态会稀释真实性信号**
+
+`mock | walrus | memwal` 三态并存，加上大量"works even if API unavailable / mock mode"的措辞，风险是评委怀疑你**整个 demo 都跑在 mock 上**。Walrus 赛道明确要求真实写入。建议：
+
+- demo 主路径**必须默认 memwal/walrus 真实模式**，mock 仅作为 fallback 且 UI 上有醒目降级标识。
+- 第 15 节验收清单里加一条硬指标：**至少一次完整 demo run 产生真实的 Walrus blob ID / MemWal memory ID，并在 explorer 或 aggregator 上可独立验证**（呼应 每个文件都有可验证 ID 和可追溯历史，你总能证明数据来源）。
+
+### 🟡 强烈建议补强（决定能否冲第一而非仅获奖）
+
+**5. 第 2.3 节夺冠标准重写，显式对齐四支柱**
+
+把你的 5 条标准映射到官方四关键词 + DevTools 价值：
+- 可验证性 → 每条记忆有 content hash + Walrus blob ID，UI 可一键验证未被篡改
+- 可用性 → 刷新/换设备后记忆仍在（你 spec 已有 refresh-and-read，很好）
+- 可移植性 → **新增 demo**：同一记忆空间被换用不同 LLM（如 GPT 和 Claude）的 agent 复用。这正中 让用户在 ChatGPT 和 Claude 这类 AI 模型间自由切换，并支持跨平台跨会话记住用户特定线索的新应用。当前 spec 的双 agent demo 只证明了共享，没证明可移植性。
+- 可共享性 → 你的跨 agent 共享 demo（已有）
+- DevTools 增量 → inspector / replay / graph（你的真正护城河）
+
+**6. 第 6.8 节 prompt injection 检测要做实，不能只是关键词匹配**
+
+记忆投毒是这个品类的真实威胁，也是你区别于 Mem0 的卖点之一。但 spec 现在只写了"keyword detector"。建议至少做：记忆来源缺失标记 + 跨记忆矛盾检测 + 共享前的敏感内容外泄警告，并把这些 warning 本身作为可审计 memory item 存入 Walrus（你已有 `warning` 类型，逻辑自洽）。
+
+**7. 第 9 节 Move 合约缺 `seal_approve` 入口函数**
+
+要让 Seal 真正接上，你的 Move 包需要一个形如 `entry fun seal_approve(id, grant, ctx)` 的策略校验函数。当前只有 create/grant/revoke。这是 Seal 集成的硬性接口，必须补。
+
+**8. 第 13 节测试：补一条端到端"防伪证"测试**
+
+加一条集成测试：写入记忆 → 拿到 blob ID → **绕过你的应用、直接用 Walrus aggregator HTTP 读出同一 blob 并校验 hash**。这一条测试在 demo 视频里展示，是对"我们没在 mock"最有力的回击。
+
+### 🟢 锦上添花
+
+**9. SDK/adapter 的可复用性要落到"别人能 copy"**（呼应你第 3.3 节生态用户）。MemWal 的主张是 agent 记忆应该是用户拥有的基础设施——如果你的 Studio adapter 能被本次比赛其他 AI agent 项目直接接入，会显著提升 sponsor 眼中的生态价值。
+
+**10. 文档里把 demo 场景与"高价值真实工作流"绑定**，但别滑向 DeepBook。成功取决于能否在可验证性和可移植性不可妥协的复杂协作 agent 工作流中展示更强的实用性——research-to-strategy 这个主 demo 选得对，trading journal 作为副 demo 也合适。
+
+---
+
+## 三、修改优先级清单（按对夺冠的影响排序）
+
+| 优先级 | 修改项 | spec 位置 |
+|---|---|---|
+| 🔴 P0 | 重写定位：MemWal 之上的可观测/治理/审计层，不是又一个 SDK | 第 1、2.2 节 |
+| 🔴 P0 | Seal 从可选升为核心：Move 策略 → seal_approve → 真实加密/解密/撤销 | 第 5.2、9、12.3 节 |
+| 🔴 P0 | demo 默认真实存储，mock 仅 fallback；加可独立验证的 blob ID | 第 11.1、15 节 |
+| 🔴 P0 | 真实调用 MemWal SDK（含其 Vercel AI SDK 集成），而非自造 write/search | 第 4、11.1 节 |
+| 🟡 P1 | 夺冠标准显式对齐"可验证/可用/可移植/可共享" | 第 2.3 节 |
+| 🟡 P1 | 新增"可移植性" demo：同一记忆被不同 LLM 的 agent 复用 | 第 4 节 |
+| 🟡 P1 | 补 Move `seal_approve` 函数 | 第 9 节 |
+| 🟡 P1 | 端到端"防伪证"测试（绕过应用直读 Walrus 验 hash） | 第 13 节 |
+| 🟢 P2 | injection/投毒检测做实；adapter 可复用化 | 第 6.8、3.3 节 |
+
+---
+
+**一句话总结**：你这份 spec 的工程结构（数据模型、API、Move、UI）已经相当完整专业，**真正的风险不在工程而在战略定位**——它现在读起来像"自建一个 MemWal"，而 MemWal 已经存在且很可能是评委。把它彻底重定位成"MemWal 的可观测 + Seal 治理 + 审计 DevTools 层"，并把 Seal 真实链路和真实存储证明做扎实，这个项目就从"能获奖"变成"能冲 Walrus 专项第一"。
+
+需要我帮你把上面 P0 的几处直接改写成可替换进 SPEC.md 的具体段落（含 Move `seal_approve` 骨架和 MemWal adapter 接口）吗？
