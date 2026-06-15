@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-15T15:25:00+08:00",
+  "generatedAt": "2026-06-15T15:34:00+08:00",
   "verifications": {
     "storageProof": "docs/storage-proof.json - real-only storage policy with live Walrus proof",
     "aggregatorProof": "docs/aggregator-proof.json - live Walrus aggregator roundtrip",
@@ -9,8 +9,8 @@
   "submissionReadiness": {
     "repo": "Ready (public GitHub: github.com/SU-AN-coder/MemWal-Studio)",
     "app": "Ready (Vite + React, build passes, 19 tests green)",
-    "demo": "Ready after live credentials are loaded in the browser",
-    "memwalIntegration": "Wired but awaiting missing private key/account value",
+    "demo": "Ready with live credentials configured locally",
+    "memwalIntegration": "Ready with live account/delegate and remember/recall proofs",
     "walrusIntegration": "Ready with live publisher/aggregator proof",
     "suiIntegration": "Ready with live package/object proof",
     "sealIntegration": "Ready with live key release proof",
@@ -18,7 +18,7 @@
     "studioSDK": "Ready (agent instrumentation APIs)"
   },
   "proofStatus": {
-    "memwalSemanticRecall": { "status": "requires_credentials", "details": "Run npm run memwal:provision and npm run verify:memwal after restoring the private key." },
+    "memwalSemanticRecall": { "status": "verified", "details": "docs/memwal-live-proof.json matched=true." },
     "walrusAggregatorHash": { "status": "verified", "details": "Live testnet roundtrip verified." },
     "suiMemorySpace": { "status": "verified", "details": "Move package, MemorySpace, and shared AccessGrant exist on testnet." },
     "sealApproveBeforeDeny": { "status": "verified", "details": "Seal decrypts after policy approval." },
@@ -27,7 +27,6 @@
     "studioSDK": { "status": "complete", "details": "SDK-style services for external agent instrumentation." }
   },
   "championshipGaps": [
-    "Live MemWal proof after restoring MEMWAL_PRIVATE_KEY and MEMWAL_ACCOUNT_ID",
     "Bundle-size reduction via dynamic SDK imports"
   ]
 }

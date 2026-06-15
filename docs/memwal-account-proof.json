@@ -1,0 +1,13 @@
+{
+  "network": "testnet",
+  "packageId": "0xcf6ad755a1cdff7217865c796778fabe5aa399cb0cf2eba986f4b582047229c6",
+  "registryId": "0xe80f2feec1c139616a86c9f71210152e2a7ca552b20841f2e192f99f75864437",
+  "accountId": "0xaf2cc6792400e32453c6b4e488c30a6cff425f339a4dc1aacbbf004b9c7a76ca",
+  "owner": "0x6924d26f500c8e2f37a6734963591f628afcd52389c798445f44ee71ce29c2e2",
+  "createAccountDigest": null,
+  "delegatePublicKey": "6eeee5bc28f09f71452f41dd03f3635800c789a715d62a32a7f5d775ce0693a2",
+  "delegateSuiAddress": "existing",
+  "addDelegateDigest": null,
+  "delegateAlreadyRegistered": true,
+  "createdAt": "2026-06-15T07:33:50.706Z"
+}

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-06-15T15:26:45+08:00",
+  "generatedAt": "2026-06-15T15:34:50+08:00",
   "verificationMode": "WALRUS_TESTNET_LIVE",
   "proofSource": "docs/walrus-live-proof.json",
   "publisherUrl": "https://publisher.walrus-testnet.walrus.space",
   "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space",
-  "blobId": "KZuyL_YTHU1fN6zGL3JbANjL1ZlCi0Jg2TQGS56oSWw",
+  "blobId": "kqK7yUEPtFluWu2z8hxwGC3hV4lGWtsrf5aCkE30ENE",
   "roundtripVerified": true
 }

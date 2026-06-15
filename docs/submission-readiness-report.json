@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-15T15:25:00+08:00",
+  "generatedAt": "2026-06-15T15:34:00+08:00",
   "verifications": {
     "typescript": "npm run lint passed",
     "vitest": "npm run test passed: 2 files, 19 tests",
@@ -9,20 +9,19 @@
     "suiLiveObjects": "docs/sui-live-objects-proof.json includes MemorySpace and shared AccessGrant",
     "sealKeyRelease": "docs/seal-live-proof.json decryptionKeyReleaseStatus=passed",
     "sealDenial": "docs/seal-live-proof.json mismatchedIdentityKeyReleaseStatus=denied",
-    "memwalCredentials": "MEMWAL_PUBLIC_KEY/package/registry/relayer configured; MEMWAL_PRIVATE_KEY and MEMWAL_ACCOUNT_ID are absent in .env"
+    "memwalCredentials": "docs/memwal-account-proof.json account/delegate verified",
+    "memwalLiveProof": "docs/memwal-live-proof.json matched=true"
   },
   "submissionReadiness": {
     "repo": "Ready",
     "app": "Ready",
-    "demo": "Ready after live storage credentials are loaded into the browser",
+    "demo": "Ready with live storage credentials configured locally",
     "walrusIntegration": "Ready: live testnet publisher and aggregator proof passes",
     "suiIntegration": "Ready: Move package published on testnet and live objects created",
     "sealIntegration": "Ready: SDK encrypt/decrypt key release passes with policy denial proof",
-    "memwalIntegration": "Wired but not verified: missing local private key/account value"
+    "memwalIntegration": "Ready: live account/delegate and remember/recall proofs pass"
   },
   "highestImpactRemainingWork": [
-    "Restore MEMWAL_PRIVATE_KEY in .env and run npm run memwal:provision",
-    "Run npm run verify:memwal to generate docs/memwal-live-proof.json",
     "Code-split heavy SDK imports to remove the current Vite bundle-size warning",
     "Record a judging demo with live Walrus, Sui, Seal, and MemWal evidence"
   ]

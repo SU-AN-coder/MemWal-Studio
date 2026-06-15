@@ -2,8 +2,8 @@
   "network": "testnet",
   "publisherUrl": "https://publisher.walrus-testnet.walrus.space",
   "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space",
-  "blobId": "KZuyL_YTHU1fN6zGL3JbANjL1ZlCi0Jg2TQGS56oSWw",
-  "publishedAt": "2026-06-15T07:26:45.969Z",
+  "blobId": "kqK7yUEPtFluWu2z8hxwGC3hV4lGWtsrf5aCkE30ENE",
+  "publishedAt": "2026-06-15T07:34:50.348Z",
   "payloadBytes": 98,
   "roundtripVerified": true
 }
