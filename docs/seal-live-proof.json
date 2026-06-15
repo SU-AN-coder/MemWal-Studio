@@ -1,0 +1,21 @@
+{
+  "network": "testnet",
+  "packageId": "0x918d1dcab8dc33234ef0bdc8e2c7b21e6a4fb50d2ed8a2891287dbcdd503d986",
+  "identity": "0x80df6cf3fa21fb625e194d3e192ba14d9850e6b877e376c27a2a972128b3aa51",
+  "requester": "0x6924d26f500c8e2f37a6734963591f628afcd52389c798445f44ee71ce29c2e2",
+  "memorySpaceObjectId": "0x80df6cf3fa21fb625e194d3e192ba14d9850e6b877e376c27a2a972128b3aa51",
+  "accessGrantObjectId": "0x709e73432aa0bde090ec7c862ee9c007bcd77403fe32b625cadf175db26e8a02",
+  "keyServerObjectId": "0xb012378c9f3799fb5b1a7083da74a4069e3c3f1c93de0b27212a5799ce1e1e98",
+  "aggregatorUrl": "https://seal-aggregator-testnet.mystenlabs.com",
+  "encryptedBytes": 315,
+  "symmetricKeyBytes": 32,
+  "encryptionVerified": true,
+  "decryptionKeyReleaseStatus": "failed",
+  "decryptedMatchesPlaintext": false,
+  "decryptionError": {
+    "name": "Error",
+    "message": "Session key has expired",
+    "requestId": "8682da40-8f3a-4d3e-be3f-f357bd91edc1"
+  },
+  "verifiedAt": "2026-06-15T06:12:44.077Z"
+}

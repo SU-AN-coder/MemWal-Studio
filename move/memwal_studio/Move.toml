@@ -1,0 +1,13 @@
+# This package defines the on-chain objects for MemWal Studio memory governance.
+
+[package]
+name = "memwal_studio"
+version = "0.1.0"
+edition = "2024.beta"
+
+[addresses]
+memwal_studio = "0x0" # Replace with actual address after `sui client publish`
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "ff1fe0ec455153707136cffd0dc77dfb77ba9ad5" }
+

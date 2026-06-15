@@ -1,0 +1,9 @@
+{
+  "network": "testnet",
+  "publisherUrl": "https://publisher.walrus-testnet.walrus.space",
+  "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space",
+  "blobId": "0ga74jC4jPO-U3ZxAlg0Nknk8C0VwkfE_Q-WOzynz8o",
+  "publishedAt": "2026-06-15T06:13:44.598Z",
+  "payloadBytes": 98,
+  "roundtripVerified": true
+}

@@ -1,0 +1,21 @@
+{
+  "network": "testnet",
+  "packageId": "0x918d1dcab8dc33234ef0bdc8e2c7b21e6a4fb50d2ed8a2891287dbcdd503d986",
+  "owner": "0x68b387c5719f8964015f2e16681e888325eb66c60e730a96bbd21b2e388b8d63",
+  "memorySpace": {
+    "objectId": "0x80df6cf3fa21fb625e194d3e192ba14d9850e6b877e376c27a2a972128b3aa51",
+    "createTxDigest": "EZvKkxbTurUhjBaSE4yEovaWhHDvLM26HWMdcucW3FZG",
+    "name": "overflow-agent-research",
+    "walrusIndexBlobId": "walrus_live_index_J2yW3utLwIRwL4Ddav4VHswrwfk_MibXbtuxovjLzQo"
+  },
+  "accessGrant": {
+    "objectId": "0x709e73432aa0bde090ec7c862ee9c007bcd77403fe32b625cadf175db26e8a02",
+    "grantTxDigest": "5mQAfr57Z99TfqBfGGS4MvzFe4jeT3ELbwNXBdzWd6Rs",
+    "agent": "0x6924d26f500c8e2f37a6734963591f628afcd52389c798445f44ee71ce29c2e2",
+    "permission": 1,
+    "expiresAtMs": 0,
+    "owner": "Shared",
+    "initialSharedVersion": 901606698
+  },
+  "createdAt": "2026-06-15T14:08:07+08:00"
+}

@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-06-14T21:30:00.000Z",
+  "policyType": "prototype",
+  "movePackagePath": "move/memwal_studio",
+  "sealApprovalFunction": "seal_approve(space, grant, requester, permission, clock): bool",
+  "proofs": [
+    {
+      "condition": "Agent B has active read grant",
+      "expectedResult": "seal_approve returns true",
+      "status": "move_test_verified",
+      "details": "test_seal_approve_flow verifies this condition"
+    },
+    {
+      "condition": "Agent B grant is revoked",
+      "expectedResult": "seal_approve returns false",
+      "status": "move_test_verified",
+      "details": "test_seal_approve_flow verifies denial after revocation"
+    },
+    {
+      "condition": "Stranger C requests access (no grant)",
+      "expectedResult": "seal_approve returns false",
+      "status": "move_test_verified",
+      "details": "test_seal_approve_flow verifies stranger is denied"
+    },
+    {
+      "condition": "Full Seal SDK integration (decryption key release)",
+      "expectedResult": "Seal decrypts after approval, denies after revoke",
+      "status": "prototype",
+      "details": "Move policy is ready. Full Seal SDK integration requires testnet deployment and Seal service configuration. Contact the Seal team for SDK access."
+    }
+  ],
+  "note": "The Move policy is complete and tested. Full cryptographic revocation (Seal decrypting/denying based on policy) is marked as prototype until Seal SDK integration is completed. Do not claim cryptographic revocation until this path is verified end-to-end."
+}

@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-06-14T21:30:00.000Z",
+  "verificationMode": "MOCK",
+  "proofs": [
+    {
+      "blobId": "mock_blob_mem_item_sha256:abc123def456",
+      "verified": false,
+      "status": "pending",
+      "description": "Independent Walrus aggregator verification requires real Walrus endpoints.",
+      "steps": [
+        "1. Write memory envelope through WalrusStorageAdapter",
+        "2. Record blob ID and content hash from receipt",
+        "3. Read blob through Walrus aggregator (bypass app read path)",
+        "4. Compute hash of returned bytes",
+        "5. Verify hash matches stored hash"
+      ],
+      "command": "curl \"$WALRUS_AGGREGATOR_URL/v1/{blobId}\" | sha256sum"
+    }
+  ],
+  "note": "Configure WALRUS_PUBLISHER_URL and WALRUS_AGGREGATOR_URL in .env to enable real aggregator verification. The WalrusStorageAdapter already supports the independent verification path."
+}

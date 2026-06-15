@@ -1,0 +1,17 @@
+{
+  "network": "testnet",
+  "publishedAt": "2026-06-15T06:07:36.361Z",
+  "sender": "0x68b387c5719f8964015f2e16681e888325eb66c60e730a96bbd21b2e388b8d63",
+  "transactionDigest": "B7WJWPhPVpN54mL5fdM94yZdqyWpVLzhNzG54GB6ZXzC",
+  "packageId": "0x918d1dcab8dc33234ef0bdc8e2c7b21e6a4fb50d2ed8a2891287dbcdd503d986",
+  "upgradeCapId": "0x3bf82bfb4c667fdd6edf910ae401a2322972a42988eaa10780a603c06e167cdf",
+  "modules": [
+    "memory_space"
+  ],
+  "moveTests": {
+    "command": "sui move test",
+    "total": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

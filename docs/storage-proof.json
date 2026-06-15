@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-06-14T22:00:00.000Z",
+  "storageMode": "REAL_SDK_READY",
+  "proofs": [
+    {
+      "type": "memwal-write",
+      "verified": false,
+      "status": "sdk_ready",
+      "description": "Real @mysten-incubation/memwal SDK installed and integrated. Write path uses rememberAndWait() which returns real blob_id. Requires MEMWAL_PRIVATE_KEY and MEMWAL_ACCOUNT_ID in localStorage.",
+      "sdkMethod": "memwal.rememberAndWait(JSON.stringify(envelope))",
+      "expectedOutput": "{ blob_id: 'HNrJIBSD...', id: '...', owner: '0x...' }"
+    },
+    {
+      "type": "memwal-read",
+      "verified": false,
+      "status": "sdk_ready",
+      "description": "Read path uses memwal.recall() for semantic retrieval. Requires credentials.",
+      "sdkMethod": "memwal.recall({ query, topK, maxDistance })"
+    },
+    {
+      "type": "mock-write",
+      "verified": true,
+      "description": "Mock storage adapter provides deterministic receipts. Content hashes verified.",
+      "note": "Mock mode is for local development only. Real proof requires MemWal credentials."
+    }
+  ],
+  "note": "To generate real storage proof: 1) Get credentials from https://staging.memory.walrus.xyz, 2) Enter in MemWal Config panel, 3) Run demo, 4) Verify blob_id appears in memory inspector."
+}
