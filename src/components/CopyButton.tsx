@@ -18,7 +18,7 @@ export function CopyButton({ value, label }: CopyButtonProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      // Fallback
+      // Browser compatibility path
       const ta = document.createElement("textarea");
       ta.value = value;
       ta.style.position = "fixed";

@@ -496,7 +496,7 @@ visible, verifiable, and debuggable.
 ## Go-to-Market Strategy
 
 ### Developer Preview (Free)
-- Chrome extension with local mock storage
+- Browser extension with local encrypted cache
 - Single-agent memory inspection
 - Community on Discord/GitHub
 

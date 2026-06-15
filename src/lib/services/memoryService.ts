@@ -4,6 +4,7 @@
 import type { MemorySpace, MemoryItem, StorageReceipt } from "../domain/types";
 import type { MemoryStorageAdapter } from "../storage/types";
 import type { LocalIndex } from "../index/localIndex";
+import type { StorageMode } from "../domain/types";
 import { generateId, isoNow } from "../domain/helpers";
 import { computeHash } from "../storage/hash";
 import {
@@ -14,7 +15,7 @@ import { AppError } from "../domain/types";
 
 export interface MemoryServiceDeps {
   index: LocalIndex;
-  storageMode: "MOCK" | "WALRUS" | "MEMWAL";
+  storageMode: StorageMode;
 }
 
 export function createMemoryService(deps: MemoryServiceDeps) {

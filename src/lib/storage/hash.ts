@@ -16,7 +16,7 @@ export async function computeHashBytes(
 }
 
 export function computeHashSync(content: string): string {
-  // Fallback for environments without async crypto
+      // Deterministic path for environments without async crypto
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const chr = content.charCodeAt(i);

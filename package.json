@@ -12,11 +12,14 @@
     "verify:demo": "npm run build && npm test",
     "verify:config": "node scripts/verify-config.mjs",
     "memwal:configure": "node scripts/configure-memwal.mjs",
+    "memwal:provision": "node scripts/provision-memwal-account.mjs",
+    "verify:memwal": "node scripts/verify-memwal.mjs",
     "verify:storage": "node scripts/verify-walrus.mjs",
     "verify:aggregator": "node scripts/verify-walrus.mjs",
     "move:test": "cd move/memwal_studio && sui move test",
     "move:publish": "node scripts/publish-sui.mjs",
-    "verify:seal": "node scripts/verify-seal.mjs"
+    "verify:seal": "node scripts/verify-seal.mjs",
+    "verify:live": "npm run verify:config && npm run verify:storage && npm run verify:memwal && npm run verify:seal"
   },
   "dependencies": {
     "@mysten-incubation/memwal": "^0.0.7",

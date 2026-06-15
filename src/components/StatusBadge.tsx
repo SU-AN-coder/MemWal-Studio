@@ -50,7 +50,6 @@ type Props =
   | SeverityBadgeProps;
 
 const STORAGE_COLORS: Record<StorageMode, { bg: string; fg: string; border: string }> = {
-  MOCK: { bg: "#fff8e8", fg: "#8a5b08", border: "#ffd794" },
   WALRUS: { bg: "#effbf8", fg: "#08715f", border: "#a9e6d8" },
   MEMWAL: { bg: "#edf7ff", fg: "#1f6592", border: "#b5d8f7" },
 };

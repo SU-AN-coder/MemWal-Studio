@@ -165,12 +165,6 @@ button {
     background: #effbf8;
 }
 
-.mode.mock {
-    color: #9a5b00;
-    border-color: #ffd794;
-    background: #fff8e8;
-}
-
 .wallet {
     color: #526270;
 }
@@ -364,7 +358,7 @@ td:last-child {
     color: #8a5b08;
 }
 
-.proofLine.prototype span {
+.proofLine.blocked span {
     color: #6657a8;
 }
 

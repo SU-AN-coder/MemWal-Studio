@@ -97,16 +97,13 @@ export function EvidenceView() {
     );
   };
 
-  const mockProofs: ProofReceipt[] = useMemo(
+  const storageProofs: ProofReceipt[] = useMemo(
     () => [
       {
         type: "storage",
-        verified: storageMode !== "MOCK",
-        details:
-          storageMode === "MOCK"
-            ? "Mock mode — no storage proofs"
-            : "Storage proofs available",
-        verifiedAt: storageMode !== "MOCK" ? new Date().toISOString() : null,
+        verified: false,
+        details: `${storageMode} writes require a live receipt before submission`,
+        verifiedAt: null,
       },
       {
         type: "aggregator",
@@ -117,7 +114,7 @@ export function EvidenceView() {
       {
         type: "seal-policy",
         verified: false,
-        details: "Seal access policy verification pending",
+        details: "Seal key release proof required",
         verifiedAt: null,
       },
     ],
@@ -164,7 +161,7 @@ export function EvidenceView() {
               <h2 style={{ margin: 0, fontSize: 15 }}>Storage Proof Status</h2>
             </div>
             <div style={{ display: "grid", gap: 8 }}>
-              {mockProofs.map((pr) => (
+              {storageProofs.map((pr) => (
                 <div
                   key={pr.type}
                   style={{
@@ -201,7 +198,7 @@ export function EvidenceView() {
                   <StatusBadge
                     variant="run"
                     value={pr.verified ? "completed" : "running"}
-                    label={pr.verified ? "VERIFIED" : "PENDING"}
+                    label={pr.verified ? "VERIFIED" : "REQUIRED"}
                   />
                 </div>
               ))}
@@ -368,7 +365,7 @@ export function EvidenceView() {
                   {report.proofReceipts.filter((p) => p.verified).length} of{" "}
                   {report.proofReceipts.length} proofs verified
                   {report.proofReceipts.filter((p) => !p.verified).length > 0 &&
-                    ` — ${report.proofReceipts.filter((p) => !p.verified).length} pending`}
+                    ` — ${report.proofReceipts.filter((p) => !p.verified).length} required`}
                 </div>
                 <div style={{ display: "grid", gap: 8 }}>
                   {report.proofReceipts.map((pr) => (
@@ -396,7 +393,7 @@ export function EvidenceView() {
                             Verified
                           </span>
                         ) : (
-                          <span style={{ color: "#8a5b08" }}>Pending</span>
+                          <span style={{ color: "#8a5b08" }}>Required</span>
                         )}
                       </strong>
                     </div>

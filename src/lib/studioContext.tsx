@@ -11,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { LocalIndex } from "./index/localIndex";
-import { MockStorageAdapter } from "./storage/mockStorageAdapter";
 import { WalrusStorageAdapter } from "./storage/walrusStorageAdapter";
 import { MemWalStorageAdapter } from "./storage/memwalStorageAdapter";
 import type { MemoryStorageAdapter } from "./storage/types";
@@ -115,7 +114,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         return new WalrusStorageAdapter(publisherUrl, aggregatorUrl);
       }
       default:
-        return new MockStorageAdapter();
+        return new MemWalStorageAdapter();
     }
   }, [storageMode]);
 

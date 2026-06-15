@@ -12,7 +12,6 @@ import {
   Network,
   Play,
   ShieldCheck,
-  TriangleAlert,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useStudio } from "../../lib/studioContext";
@@ -30,7 +29,7 @@ import type {
   AgentRun as AgentRunType,
 } from "../../lib/domain/types";
 
-type ProofStatus = "passed" | "waiting" | "prototype";
+type ProofStatus = "passed" | "waiting" | "blocked";
 
 interface ProofRow {
   label: string;
@@ -40,7 +39,7 @@ interface ProofRow {
 
 export function DashboardView() {
   const studio = useStudio();
-  const { activeSpace, index, storageMode, loading, error, success } = studio;
+  const { activeSpace, index, loading, error, success } = studio;
 
   // Read all data from index
   const spaces = useMemo(() => index.getSpaces(), [index, success, loading]);
@@ -109,28 +108,28 @@ export function DashboardView() {
       },
       {
         label: "Walrus aggregator hash",
-        value: storageMode === "MOCK" ? "mock excluded" : "sha256: pending",
+        value: "requires live proof",
         status: "waiting",
       },
       {
         label: "Sui MemorySpace",
         value: activeSpace?.suiObjectId
           ? shortId(activeSpace.suiObjectId)
-          : "pending",
+          : "requires deployment",
         status: "waiting",
       },
       {
         label: "Seal approve before revoke",
-        value: "prototype policy",
-        status: "prototype",
+        value: "requires key release proof",
+        status: "blocked",
       },
       {
         label: "Seal denial after revoke",
-        value: "prototype policy",
-        status: "prototype",
+        value: "requires revoked decrypt denial",
+        status: "blocked",
       },
     ],
-    [activeSpace, storageMode],
+    [activeSpace],
   );
 
   const activeGrantCount = useMemo(
@@ -143,10 +142,8 @@ export function DashboardView() {
   );
 
   const proofScore = useMemo(() => {
-    return storageMode === "MOCK"
-      ? "mock excluded"
-      : `${proofRows.filter((r) => r.status === "passed").length}/${proofRows.length} wired`;
-  }, [storageMode, proofRows]);
+    return `${proofRows.filter((r) => r.status === "passed").length}/${proofRows.length} live`;
+  }, [proofRows]);
 
   if (error) {
     return <div style={{ padding: 24, color: "#991b1b" }}>{error}</div>;
@@ -427,14 +424,6 @@ export function DashboardView() {
           </p>
         </article>
       </section>
-
-      {storageMode === "MOCK" && (
-        <div className="degraded">
-          <TriangleAlert size={18} />
-          Mock mode is for local fallback only. This run cannot be used as real
-          Walrus, MemWal, or Seal evidence.
-        </div>
-      )}
     </>
   );
 }

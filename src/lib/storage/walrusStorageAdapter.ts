@@ -1,6 +1,5 @@
 // MemWal Studio - Walrus Storage Adapter
 // Connects to Walrus publisher/aggregator for blob storage
-// Falls back to mock when endpoints are unavailable
 
 import type { StorageReceipt } from "../domain/types";
 import { computeHash } from "./hash";
@@ -28,13 +27,7 @@ export class WalrusStorageAdapter implements MemoryStorageAdapter {
     const contentHash = await computeHash(content);
 
     if (!this.enabled) {
-      return {
-        blobId: `walrus_pending_${contentHash.slice(0, 16)}`,
-        storageMode: "WALRUS",
-        contentHash,
-        storedAt: new Date().toISOString(),
-        aggregatorUrl: this.aggregatorUrl || null,
-      };
+      throw new Error("WALRUS_UNAVAILABLE: Walrus endpoints not configured");
     }
 
     try {
@@ -125,13 +118,7 @@ export class WalrusStorageAdapter implements MemoryStorageAdapter {
     const contentHash = await computeHash(new TextDecoder().decode(bytes));
 
     if (!this.enabled) {
-      return {
-        blobId: `walrus_pending_${contentHash.slice(0, 16)}`,
-        storageMode: "WALRUS",
-        contentHash,
-        storedAt: new Date().toISOString(),
-        aggregatorUrl: this.aggregatorUrl || null,
-      };
+      throw new Error("WALRUS_UNAVAILABLE: Walrus endpoints not configured");
     }
 
     try {

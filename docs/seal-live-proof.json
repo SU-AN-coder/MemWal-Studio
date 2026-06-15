@@ -9,13 +9,17 @@
   "aggregatorUrl": "https://seal-aggregator-testnet.mystenlabs.com",
   "encryptedBytes": 315,
   "symmetricKeyBytes": 32,
+  "sessionClockSkewMs": 30000,
   "encryptionVerified": true,
-  "decryptionKeyReleaseStatus": "failed",
-  "decryptedMatchesPlaintext": false,
-  "decryptionError": {
+  "decryptionKeyReleaseStatus": "passed",
+  "decryptedMatchesPlaintext": true,
+  "decryptionError": null,
+  "mismatchedIdentity": "0x1111111111111111111111111111111111111111111111111111111111111111",
+  "mismatchedIdentityKeyReleaseStatus": "denied",
+  "mismatchedIdentityError": {
     "name": "Error",
-    "message": "Session key has expired",
-    "requestId": "8682da40-8f3a-4d3e-be3f-f357bd91edc1"
+    "message": "User does not have access to one or more of the requested keys",
+    "requestId": "e00353e4-2c00-4c77-a679-ec4db97f91ab"
   },
-  "verifiedAt": "2026-06-15T06:12:44.077Z"
+  "verifiedAt": "2026-06-15T07:26:42.146Z"
 }

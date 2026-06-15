@@ -53,32 +53,10 @@ const encrypted = await sealClient.encrypt({
   data: plaintext,
 });
 
-const tx = new Transaction();
-tx.moveCall({
-  target: `${env.SEAL_POLICY_PACKAGE_ID}::memory_space::seal_approve`,
-  arguments: [
-    tx.pure.vector("u8", hexToBytes(identity)),
-    tx.object(env.SEAL_GRANT_OBJECT_ID),
-    tx.pure.u8(1),
-    tx.object.clock(),
-  ],
-});
-tx.setSender(address);
+const txBytes = await buildApprovalTxBytes(address, identity);
 
-const txBytes = await tx.build({
-  client: suiClient,
-  onlyTransactionKind: true,
-});
-
-const sessionKey = await SessionKey.create({
-  address,
-  packageId: env.SEAL_POLICY_PACKAGE_ID,
-  ttlMin: 30,
-  signer: keypair,
-  suiClient,
-});
-const { signature } = await keypair.signPersonalMessage(sessionKey.getPersonalMessage());
-await sessionKey.setPersonalMessageSignature(signature);
+const sessionSkewMs = 30_000;
+const sessionKey = await createStableSessionKey(address, keypair, sessionSkewMs);
 
 const expectedText = new TextDecoder().decode(plaintext);
 let decryptedText = "";
@@ -106,6 +84,27 @@ try {
   };
 }
 
+const deniedIdentity = `0x${"11".repeat(32)}`;
+const deniedTxBytes = await buildApprovalTxBytes(address, deniedIdentity);
+let mismatchedIdentityDenied = false;
+let mismatchedIdentityError = null;
+
+try {
+  await sealClient.fetchKeys({
+    ids: [deniedIdentity],
+    txBytes: deniedTxBytes,
+    sessionKey,
+    threshold: 1,
+  });
+} catch (error) {
+  mismatchedIdentityDenied = true;
+  mismatchedIdentityError = {
+    name: error?.name ?? "Error",
+    message: error?.message ?? String(error),
+    requestId: error?.requestId ?? null,
+  };
+}
+
 const proof = {
   network: env.SUI_NETWORK,
   packageId: env.SEAL_POLICY_PACKAGE_ID,
@@ -117,18 +116,65 @@ const proof = {
   aggregatorUrl: env.SEAL_AGGREGATOR_URL,
   encryptedBytes: encrypted.encryptedObject.length,
   symmetricKeyBytes: encrypted.key.length,
+  sessionClockSkewMs: sessionSkewMs,
   encryptionVerified: encrypted.encryptedObject.length > plaintext.length,
   decryptionKeyReleaseStatus: decryptedText === expectedText ? "passed" : "failed",
   decryptedMatchesPlaintext: decryptedText === expectedText,
   decryptionError,
+  mismatchedIdentity: deniedIdentity,
+  mismatchedIdentityKeyReleaseStatus: mismatchedIdentityDenied
+    ? "denied"
+    : "unexpectedly_allowed",
+  mismatchedIdentityError,
   verifiedAt: new Date().toISOString(),
 };
 
 writeFileSync(resolve(repoRoot, "docs", "seal-live-proof.json"), `${JSON.stringify(proof, null, 2)}\n`);
 console.log(JSON.stringify(proof, null, 2));
 
-if (!proof.encryptionVerified || !proof.decryptedMatchesPlaintext) {
+if (
+  !proof.encryptionVerified ||
+  !proof.decryptedMatchesPlaintext ||
+  !mismatchedIdentityDenied
+) {
   throw new Error("Seal full decrypt proof failed. See docs/seal-live-proof.json.");
+}
+
+async function createStableSessionKey(address, signer, skewMs) {
+  const freshSessionKey = await SessionKey.create({
+    address,
+    packageId: env.SEAL_POLICY_PACKAGE_ID,
+    ttlMin: 10,
+    signer,
+    suiClient,
+  });
+  const exportedSessionKey = freshSessionKey.export();
+  exportedSessionKey.creationTimeMs = Date.now() - skewMs;
+  delete exportedSessionKey.personalMessageSignature;
+  const sessionKey = SessionKey.import(exportedSessionKey, suiClient, signer);
+  const { signature } = await signer.signPersonalMessage(
+    sessionKey.getPersonalMessage(),
+  );
+  await sessionKey.setPersonalMessageSignature(signature);
+  return sessionKey;
+}
+
+async function buildApprovalTxBytes(sender, approvalIdentity) {
+  const tx = new Transaction();
+  tx.moveCall({
+    target: `${env.SEAL_POLICY_PACKAGE_ID}::memory_space::seal_approve`,
+    arguments: [
+      tx.pure.vector("u8", hexToBytes(approvalIdentity)),
+      tx.object(env.SEAL_GRANT_OBJECT_ID),
+      tx.pure.u8(1),
+      tx.object.clock(),
+    ],
+  });
+  tx.setSender(sender);
+  return tx.build({
+    client: suiClient,
+    onlyTransactionKind: true,
+  });
 }
 
 function hexToBytes(value) {

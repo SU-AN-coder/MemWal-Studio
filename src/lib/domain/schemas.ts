@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 
-export const storageModeSchema = z.enum(["MOCK", "WALRUS", "MEMWAL"]);
+export const storageModeSchema = z.enum(["WALRUS", "MEMWAL"]);
 
 export const memoryTypeSchema = z.enum([
   "observation",

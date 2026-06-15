@@ -22,7 +22,7 @@ export function FirstRunWizard() {
       try {
         createSpace(
           "Demo Space",
-          "Pre-populated demo space showcasing MemWal Studio capabilities. Connect MemWal credentials for real persistence.",
+          "Pre-populated demo space showcasing MemWal Studio capabilities. Configure MemWal credentials before running persistent writes.",
           "demo-owner",
           ["demo", "research", "first-run"],
         );
@@ -67,10 +67,9 @@ export function FirstRunWizard() {
     >
       <Info size={18} style={{ color: "#08715f", flexShrink: 0 }} />
       <div style={{ flex: 1 }}>
-        <strong style={{ color: "#08715f" }}>Demo mode active</strong>
+        <strong style={{ color: "#08715f" }}>Demo space ready</strong>
         <span style={{ color: "#4a7c6f", marginLeft: 8 }}>
-          — connect MemWal credentials in Settings for real persistence. A Demo
-          Space has been created and populated with Research Agent data.
+          Configure MemWal credentials before storing live Research Agent data.
         </span>
       </div>
       {loading && (

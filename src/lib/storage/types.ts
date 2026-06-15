@@ -20,10 +20,3 @@ export interface MemoryStorageAdapter {
   ): Promise<{ bytes: Uint8Array<ArrayBuffer>; receipt: StorageReceipt }>;
   getBlobId(key: string): Promise<string | null>;
 }
-
-// Deterministic mock blob ID generator
-export function mockBlobId(key: string, contentHash: string): string {
-  const keyPart = key.slice(0, 12);
-  const hashPart = contentHash.slice(0, 12);
-  return `mock_blob_${keyPart}_${hashPart}`;
-}

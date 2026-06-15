@@ -1,26 +1,23 @@
 // MemWal Studio - MemWal Storage Adapter
 // Uses the real @mysten-incubation/memwal SDK for agent memory operations.
-// Falls back to MockStorageAdapter when credentials are missing.
 
 import { MemWal } from "@mysten-incubation/memwal";
 import type { StorageReceipt } from "../domain/types";
 import { computeHash } from "./hash";
 import type { MemoryStorageAdapter } from "./types";
-import { MockStorageAdapter } from "./mockStorageAdapter";
 
 export class MemWalStorageAdapter implements MemoryStorageAdapter {
   readonly mode = "MEMWAL" as const;
 
   private memwal: MemWal | null = null;
-  private mockFallback: MockStorageAdapter;
   private namespace: string;
   private serverUrl: string;
 
   constructor() {
-    this.mockFallback = new MockStorageAdapter();
     this.namespace = "memwal_studio";
     this.serverUrl =
-      localStorage.getItem("MEMWAL_SERVER_URL") ?? "https://relayer.memwal.ai";
+      localStorage.getItem("MEMWAL_SERVER_URL") ??
+      "https://relayer-staging.memory.walrus.xyz";
     this.initFromStorage();
   }
 
@@ -36,10 +33,7 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
           namespace: this.namespace,
         });
       } catch (err) {
-        console.warn(
-          "MemWal SDK initialization failed, using mock fallback:",
-          err,
-        );
+        console.warn("MemWal SDK initialization failed:", err);
         this.memwal = null;
       }
     }
@@ -64,16 +58,23 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
     return "MemWal init failed";
   }
 
+  private requireClient(): MemWal {
+    if (!this.memwal) {
+      throw new Error(`MEMWAL_UNAVAILABLE: ${this.getAvailabilityLabel()}`);
+    }
+    if (!this.serverUrl) {
+      throw new Error("MEMWAL_UNAVAILABLE: MemWal server URL not configured");
+    }
+    return this.memwal;
+  }
+
   async writeJson(key: string, data: unknown): Promise<StorageReceipt> {
     const content = JSON.stringify(data);
     const contentHash = await computeHash(content);
-
-    if (!this.memwal) {
-      return this.mockFallback.writeJson(key, data);
-    }
+    const memwal = this.requireClient();
 
     try {
-      const result = await this.memwal.rememberAndWait(content, undefined, {
+      const result = await memwal.rememberAndWait(content, key, {
         timeoutMs: 30_000,
       });
 
@@ -85,9 +86,9 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
         aggregatorUrl: null,
       };
     } catch (err) {
-      console.warn("MemWal writeJson failed, falling back to mock:", err);
-      const fallbackReceipt = await this.mockFallback.writeJson(key, data);
-      return { ...fallbackReceipt, storageMode: "MEMWAL" };
+      throw new Error(
+        `MEMWAL_UNAVAILABLE: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -95,20 +96,18 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
     key: string,
     expectedHash?: string,
   ): Promise<{ data: T; receipt: StorageReceipt }> {
-    if (!this.memwal) {
-      return this.mockFallback.readJson<T>(key, expectedHash);
-    }
+    const memwal = this.requireClient();
 
     try {
-      const recallResult = await this.memwal.recall({
+      const recallResult = await memwal.recall({
         query: key,
+        namespace: key,
         topK: 1,
         maxDistance: 0.7,
       });
 
       if (!recallResult.results || recallResult.results.length === 0) {
-        // Fall back to mock if MemWal has no results
-        return this.mockFallback.readJson<T>(key, expectedHash);
+        throw new Error(`MEMWAL_NOT_FOUND: ${key}`);
       }
 
       const matched = recallResult.results[0];
@@ -131,8 +130,9 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
       };
     } catch (err) {
       if (err instanceof Error && err.message === "HASH_MISMATCH") throw err;
-      // Fall back to mock on any retrieval error
-      return this.mockFallback.readJson<T>(key, expectedHash);
+      throw new Error(
+        `MEMWAL_UNAVAILABLE: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -145,13 +145,10 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
     const base64 = btoa(String.fromCharCode(...new Uint8Array(bytes)));
     const content = `data:${mimeType ?? "application/octet-stream"};base64,${base64}`;
     const contentHash = await computeHash(content);
-
-    if (!this.memwal) {
-      return this.mockFallback.writeBytes(key, bytes, mimeType);
-    }
+    const memwal = this.requireClient();
 
     try {
-      const result = await this.memwal.rememberAndWait(content, undefined, {
+      const result = await memwal.rememberAndWait(content, key, {
         timeoutMs: 30_000,
       });
 
@@ -163,13 +160,9 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
         aggregatorUrl: null,
       };
     } catch (err) {
-      console.warn("MemWal writeBytes failed, falling back to mock:", err);
-      const fallbackReceipt = await this.mockFallback.writeBytes(
-        key,
-        bytes,
-        mimeType,
+      throw new Error(
+        `MEMWAL_UNAVAILABLE: ${err instanceof Error ? err.message : "Unknown error"}`,
       );
-      return { ...fallbackReceipt, storageMode: "MEMWAL" };
     }
   }
 
@@ -177,19 +170,18 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
     key: string,
     expectedHash?: string,
   ): Promise<{ bytes: Uint8Array<ArrayBuffer>; receipt: StorageReceipt }> {
-    if (!this.memwal) {
-      return this.mockFallback.readBytes(key, expectedHash);
-    }
+    const memwal = this.requireClient();
 
     try {
-      const recallResult = await this.memwal.recall({
+      const recallResult = await memwal.recall({
         query: key,
+        namespace: key,
         topK: 1,
         maxDistance: 0.7,
       });
 
       if (!recallResult.results || recallResult.results.length === 0) {
-        return this.mockFallback.readBytes(key, expectedHash);
+        throw new Error(`MEMWAL_NOT_FOUND: ${key}`);
       }
 
       const matched = recallResult.results[0];
@@ -226,18 +218,19 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
       };
     } catch (err) {
       if (err instanceof Error && err.message === "HASH_MISMATCH") throw err;
-      return this.mockFallback.readBytes(key, expectedHash);
+      throw new Error(
+        `MEMWAL_UNAVAILABLE: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     }
   }
 
   async getBlobId(key: string): Promise<string | null> {
-    if (!this.memwal) {
-      return this.mockFallback.getBlobId(key);
-    }
+    const memwal = this.requireClient();
 
     try {
-      const recallResult = await this.memwal.recall({
+      const recallResult = await memwal.recall({
         query: key,
+        namespace: key,
         topK: 1,
         maxDistance: 0.7,
       });
@@ -247,7 +240,7 @@ export class MemWalStorageAdapter implements MemoryStorageAdapter {
 
       return recallResult.results[0].blob_id;
     } catch {
-      return this.mockFallback.getBlobId(key);
+      return null;
     }
   }
 

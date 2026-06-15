@@ -19,7 +19,7 @@ interface IndexState {
   runs: AgentRun[];
   grants: AccessGrant[];
   activeSpaceId: string | null;
-  storageMode: "MOCK" | "WALRUS" | "MEMWAL";
+  storageMode: "WALRUS" | "MEMWAL";
 }
 
 const STORAGE_KEY = "memwal_studio_index";
@@ -35,7 +35,20 @@ export class LocalIndex {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        return JSON.parse(raw) as IndexState;
+        const parsed = JSON.parse(raw) as Partial<IndexState>;
+        return {
+          spaces: parsed.spaces ?? [],
+          agents: parsed.agents ?? [],
+          memories: parsed.memories ?? [],
+          artifacts: parsed.artifacts ?? [],
+          runs: parsed.runs ?? [],
+          grants: parsed.grants ?? [],
+          activeSpaceId: parsed.activeSpaceId ?? null,
+          storageMode:
+            parsed.storageMode === "WALRUS" || parsed.storageMode === "MEMWAL"
+              ? parsed.storageMode
+              : "MEMWAL",
+        };
       }
     } catch {
       // Corrupted or missing, start fresh
@@ -48,7 +61,7 @@ export class LocalIndex {
       runs: [],
       grants: [],
       activeSpaceId: null,
-      storageMode: "MOCK",
+      storageMode: "MEMWAL",
     };
   }
 
@@ -198,10 +211,10 @@ export class LocalIndex {
   }
 
   // === Storage Mode ===
-  getStorageMode(): "MOCK" | "WALRUS" | "MEMWAL" {
+  getStorageMode(): "WALRUS" | "MEMWAL" {
     return this.state.storageMode;
   }
-  setStorageMode(mode: "MOCK" | "WALRUS" | "MEMWAL"): void {
+  setStorageMode(mode: "WALRUS" | "MEMWAL"): void {
     this.state.storageMode = mode;
     this.save();
   }
@@ -216,7 +229,7 @@ export class LocalIndex {
       runs: [],
       grants: [],
       activeSpaceId: null,
-      storageMode: "MOCK",
+      storageMode: "MEMWAL",
     };
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }

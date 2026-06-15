@@ -147,15 +147,15 @@ export function createAuditService(deps: AuditServiceDeps) {
       },
       {
         type: "aggregator",
-        verified: true,
-        details: "Mock aggregator - always verified in MOCK mode",
-        verifiedAt: now,
+        verified: checkAggregatorEvidence(memoryItems, artifacts),
+        details: "Walrus aggregator URL present on persisted Walrus receipts",
+        verifiedAt: checkAggregatorEvidence(memoryItems, artifacts) ? now : null,
       },
       {
         type: "seal-policy",
-        verified: true,
-        details: "Default seal policy applied",
-        verifiedAt: now,
+        verified: false,
+        details: "Seal key release evidence must be verified by the live e2e script",
+        verifiedAt: null,
       },
     ];
 
@@ -244,6 +244,21 @@ export function createAuditService(deps: AuditServiceDeps) {
       if (!art.storageReceipt || !art.contentHash) return false;
     }
     return true;
+  }
+
+  function checkAggregatorEvidence(
+    memories: MemoryItem[],
+    artifacts: Artifact[],
+  ): boolean {
+    const receipts = [
+      ...memories.map((m) => m.storageReceipt),
+      ...artifacts.map((a) => a.storageReceipt),
+    ].filter((r): r is NonNullable<typeof r> => r !== null);
+    const walrusReceipts = receipts.filter((r) => r.storageMode === "WALRUS");
+    return (
+      walrusReceipts.length > 0 &&
+      walrusReceipts.every((r) => !!r.aggregatorUrl)
+    );
   }
 
   function exportMarkdown(report: AuditReport): string {

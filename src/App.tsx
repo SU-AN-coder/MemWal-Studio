@@ -27,8 +27,8 @@ import { AccessControl } from "./features/access/AccessControl";
 import { EvidenceView } from "./features/evidence/EvidenceView";
 import { DemoRunner } from "./features/demo/DemoRunner";
 import { FirstRunWizard } from "./components/FirstRunWizard";
+import type { StorageMode } from "./lib/domain/types";
 
-export type StorageMode = "MOCK" | "WALRUS" | "MEMWAL";
 type View =
   | "Dashboard"
   | "Spaces"
@@ -77,12 +77,7 @@ function AppShell() {
   };
 
   const handleToggleMode = () => {
-    const next: StorageMode =
-      storageMode === "MOCK"
-        ? "WALRUS"
-        : storageMode === "WALRUS"
-          ? "MEMWAL"
-          : "MOCK";
+    const next: StorageMode = storageMode === "WALRUS" ? "MEMWAL" : "WALRUS";
     setStorageMode(next);
   };
 
@@ -93,8 +88,6 @@ function AppShell() {
     }
     return null;
   }, [storage]);
-
-  const isRealMode = storageMode === "WALRUS" || storageMode === "MEMWAL";
 
   const viewContent = (() => {
     switch (view) {
@@ -155,10 +148,10 @@ function AppShell() {
 
           {/* Storage mode toggle */}
           <button
-            className={isRealMode ? "mode real" : "mode mock"}
+            className="mode real"
             onClick={handleToggleMode}
             style={{ cursor: "pointer" }}
-            title={`Current: ${storageMode}. Click to cycle MOCK → WALRUS → MEMWAL`}
+            title={`Current: ${storageMode}. Click to switch WALRUS / MEMWAL`}
           >
             <Database size={16} />
             {storageMode}
@@ -190,7 +183,7 @@ function AppShell() {
 
           <div className="wallet">
             <Wallet size={16} />
-            testnet wallet pending
+            testnet wallet required
           </div>
 
           <button
@@ -207,21 +200,13 @@ function AppShell() {
         <FirstRunWizard />
         {viewContent}
 
-        {storageMode === "MOCK" && (
-          <div className="degraded">
-            <TriangleAlert size={18} />
-            Mock mode is for local fallback only. This run cannot be used as
-            real Walrus, MemWal, or Seal evidence.
-          </div>
-        )}
-
         {storageMode === "MEMWAL" &&
           memwalLabel &&
           memwalLabel !== "MemWal Connected" && (
             <div className="degraded">
               <TriangleAlert size={18} />
-              MemWal is configured but not connected ({memwalLabel}). Using mock
-              fallback. Add credentials in Settings to enable real storage.
+              MemWal is not ready ({memwalLabel}). Writes fail until
+              credentials, account ID, and relayer URL are configured.
             </div>
           )}
       </section>

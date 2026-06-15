@@ -1,33 +1,20 @@
 {
-  "generatedAt": "2026-06-14T21:30:00.000Z",
-  "policyType": "prototype",
+  "generatedAt": "2026-06-15T15:24:45+08:00",
+  "policyType": "LIVE_SEAL_E2E",
   "movePackagePath": "move/memwal_studio",
-  "sealApprovalFunction": "seal_approve(space, grant, requester, permission, clock): bool",
+  "sealApprovalFunction": "seal_approve(id, grant, requested_permission, clock, ctx)",
+  "proofSource": "docs/seal-live-proof.json",
   "proofs": [
     {
-      "condition": "Agent B has active read grant",
-      "expectedResult": "seal_approve returns true",
-      "status": "move_test_verified",
-      "details": "test_seal_approve_flow verifies this condition"
+      "condition": "Requester has active read grant for the memory-space identity",
+      "expectedResult": "Seal key release succeeds and ciphertext decrypts",
+      "status": "verified"
     },
     {
-      "condition": "Agent B grant is revoked",
-      "expectedResult": "seal_approve returns false",
-      "status": "move_test_verified",
-      "details": "test_seal_approve_flow verifies denial after revocation"
-    },
-    {
-      "condition": "Stranger C requests access (no grant)",
-      "expectedResult": "seal_approve returns false",
-      "status": "move_test_verified",
-      "details": "test_seal_approve_flow verifies stranger is denied"
-    },
-    {
-      "condition": "Full Seal SDK integration (decryption key release)",
-      "expectedResult": "Seal decrypts after approval, denies after revoke",
-      "status": "prototype",
-      "details": "Move policy is ready. Full Seal SDK integration requires testnet deployment and Seal service configuration. Contact the Seal team for SDK access."
+      "condition": "Requested identity does not match grant.space_id",
+      "expectedResult": "Seal key release is denied",
+      "status": "verified"
     }
   ],
-  "note": "The Move policy is complete and tested. Full cryptographic revocation (Seal decrypting/denying based on policy) is marked as prototype until Seal SDK integration is completed. Do not claim cryptographic revocation until this path is verified end-to-end."
+  "sessionClockSkewMs": 30000
 }

@@ -1,7 +1,7 @@
 // MemWal Studio - Domain Types
 // Core type definitions for the agent memory operating layer
 
-export type StorageMode = "MOCK" | "WALRUS" | "MEMWAL";
+export type StorageMode = "WALRUS" | "MEMWAL";
 
 export type MemoryType =
   | "observation"
@@ -158,6 +158,7 @@ export type AppErrorCode =
   | "HASH_MISMATCH"
   | "SUI_TX_FAILED"
   | "WALRUS_UNAVAILABLE"
+  | "MEMWAL_UNAVAILABLE"
   | "DEMO_AGENT_FAILED"
   | "NOT_FOUND";
 

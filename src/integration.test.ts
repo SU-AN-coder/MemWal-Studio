@@ -1,7 +1,6 @@
 // MemWal Studio - Domain & Storage Integration Tests
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { MockStorageAdapter } from "./lib/storage/mockStorageAdapter";
 import { createMemoryService } from "./lib/services/memoryService";
 import { createArtifactService } from "./lib/services/artifactService";
 import { createRunService } from "./lib/services/runService";
@@ -13,17 +12,90 @@ import { RunRecorder } from "./lib/agent-sdk/runRecorder";
 import { runResearchAgent, runStrategyAgent } from "./lib/agent-sdk/demoAgents";
 import { generateId, shortId } from "./lib/domain/helpers";
 import { computeHash } from "./lib/storage/hash";
+import type { StorageReceipt } from "./lib/domain/types";
+import type { MemoryStorageAdapter } from "./lib/storage/types";
+
+class TestStorageAdapter implements MemoryStorageAdapter {
+  readonly mode = "MEMWAL" as const;
+  private values = new Map<string, { content: string; hash: string }>();
+
+  async writeJson(key: string, data: unknown): Promise<StorageReceipt> {
+    const content = JSON.stringify(data);
+    const hash = await computeHash(content);
+    this.values.set(key, { content, hash });
+    return this.receipt(key, hash);
+  }
+
+  async readJson<T>(
+    key: string,
+    expectedHash?: string,
+  ): Promise<{ data: T; receipt: StorageReceipt }> {
+    const value = this.values.get(key);
+    if (!value) throw new Error(`Key not found: ${key}`);
+    if (expectedHash && expectedHash !== value.hash) {
+      throw new Error("Hash mismatch");
+    }
+    return {
+      data: JSON.parse(value.content) as T,
+      receipt: this.receipt(key, value.hash),
+    };
+  }
+
+  async writeBytes(
+    key: string,
+    bytes: Uint8Array<ArrayBuffer>,
+  ): Promise<StorageReceipt> {
+    const content = Array.from(bytes).join(",");
+    const hash = await computeHash(content);
+    this.values.set(key, { content, hash });
+    return this.receipt(key, hash);
+  }
+
+  async readBytes(
+    key: string,
+    expectedHash?: string,
+  ): Promise<{ bytes: Uint8Array<ArrayBuffer>; receipt: StorageReceipt }> {
+    const value = this.values.get(key);
+    if (!value) throw new Error(`Key not found: ${key}`);
+    if (expectedHash && expectedHash !== value.hash) {
+      throw new Error("Hash mismatch");
+    }
+    const bytes = new Uint8Array(
+      value.content.split(",").map((n) => Number.parseInt(n, 10)),
+    ) as Uint8Array<ArrayBuffer>;
+    return { bytes, receipt: this.receipt(key, value.hash) };
+  }
+
+  async getBlobId(key: string): Promise<string | null> {
+    const value = this.values.get(key);
+    return value ? this.blobId(key, value.hash) : null;
+  }
+
+  private receipt(key: string, hash: string): StorageReceipt {
+    return {
+      blobId: this.blobId(key, hash),
+      storageMode: "MEMWAL",
+      contentHash: hash,
+      storedAt: new Date().toISOString(),
+      aggregatorUrl: null,
+    };
+  }
+
+  private blobId(key: string, hash: string): string {
+    return `test_blob_${key.slice(0, 12)}_${hash.slice(0, 12)}`;
+  }
+}
 
 function setupServices() {
   const index = new LocalIndex();
-  const storage = new MockStorageAdapter();
+  const storage = new TestStorageAdapter();
   const memoryService = createMemoryService({
     index,
-    storageMode: "MOCK" as const,
+    storageMode: "MEMWAL" as const,
   });
   const artifactService = createArtifactService({
     index,
-    storageMode: "MOCK" as const,
+    storageMode: "MEMWAL" as const,
   });
   const runService = createRunService({ index });
   const accessService = createAccessService({ index });
@@ -42,14 +114,14 @@ function setupServices() {
   };
 }
 
-describe("Mock Storage Adapter", () => {
+describe("Test Storage Adapter", () => {
   it("writes and reads JSON with deterministic receipts", async () => {
-    const storage = new MockStorageAdapter();
+    const storage = new TestStorageAdapter();
     const testData = { hello: "world", number: 42 };
     const receipt = await storage.writeJson("test-key", testData);
 
-    expect(receipt.blobId).toContain("mock_blob_");
-    expect(receipt.storageMode).toBe("MOCK");
+    expect(receipt.blobId).toContain("test_blob_");
+    expect(receipt.storageMode).toBe("MEMWAL");
     expect(receipt.contentHash).toBeTruthy();
 
     const { data, receipt: readReceipt } = await storage.readJson<
@@ -60,7 +132,7 @@ describe("Mock Storage Adapter", () => {
   });
 
   it("throws on hash mismatch", async () => {
-    const storage = new MockStorageAdapter();
+    const storage = new TestStorageAdapter();
     await storage.writeJson("hash-test", { a: 1 });
     await expect(storage.readJson("hash-test", "wrong-hash")).rejects.toThrow(
       "Hash mismatch",
@@ -68,7 +140,7 @@ describe("Mock Storage Adapter", () => {
   });
 
   it("throws on missing key", async () => {
-    const storage = new MockStorageAdapter();
+    const storage = new TestStorageAdapter();
     await expect(storage.readJson("nonexistent")).rejects.toThrow(
       "Key not found",
     );
@@ -103,7 +175,7 @@ describe("Memory Service", () => {
 
     expect(space.id).toContain("space_");
     expect(space.name).toBe("test-space");
-    expect(space.storageMode).toBe("MOCK");
+    expect(space.storageMode).toBe("MEMWAL");
     expect(svc.index.getSpaces()).toHaveLength(1);
   });
 
@@ -128,7 +200,7 @@ describe("Memory Service", () => {
 
     expect(memory.contentHash).toBeTruthy();
     expect(memory.storageReceipt).toBeTruthy();
-    expect(memory.storageReceipt!.storageMode).toBe("MOCK");
+    expect(memory.storageReceipt!.storageMode).toBe("MEMWAL");
     expect(svc.index.getMemories(spaceId)).toHaveLength(1);
   });
 

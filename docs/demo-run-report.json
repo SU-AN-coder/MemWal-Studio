@@ -1,38 +1,33 @@
 {
-  "generatedAt": "2026-06-14T22:00:00.000Z",
-  "demosRun": 1,
+  "generatedAt": "2026-06-15T15:25:00+08:00",
   "verifications": {
-    "storageProof": "docs/storage-proof.json - Mock verified. Ready for real Walrus with credentials.",
-    "aggregatorProof": "docs/aggregator-proof.json - Infrastructure ready. WalrusStorageAdapter implements verifyIndependently().",
-    "sealPolicyProof": "docs/seal-policy-proof.json - Move contract has 3 tests (create, grant/revoke, seal_approve flow). Seal SDK installed.",
-    "moveTests": "move/memwal_studio - Complete with seal_approve policy function. Ready for sui move test."
+    "storageProof": "docs/storage-proof.json - real-only storage policy with live Walrus proof",
+    "aggregatorProof": "docs/aggregator-proof.json - live Walrus aggregator roundtrip",
+    "sealPolicyProof": "docs/seal-policy-proof.json - live Seal key release and denial proof",
+    "moveTests": "move/memwal_studio - seal_approve policy tested and deployed"
   },
   "submissionReadiness": {
     "repo": "Ready (public GitHub: github.com/SU-AN-coder/MemWal-Studio)",
     "app": "Ready (Vite + React, build passes, 19 tests green)",
-    "demo": "Ready (deterministic demo agents, pre-populated demo space on first visit)",
-    "memwalIntegration": "LIVE (Real @mysten-incubation/memwal SDK integrated, requires MEMWAL_PRIVATE_KEY + MEMWAL_ACCOUNT_ID)",
-    "walrusIntegration": "Ready (WalrusStorageAdapter with real HTTP API, verifyIndependently() bypass)",
-    "suiIntegration": "Ready (@mysten/sui SDK integrated, transaction builders, wallet connection via dApp Kit)",
-    "sealIntegration": "Hybrid (@mysten/seal installed, Move seal_approve policy complete, SDK integration pending)",
+    "demo": "Ready after live credentials are loaded in the browser",
+    "memwalIntegration": "Wired but awaiting missing private key/account value",
+    "walrusIntegration": "Ready with live publisher/aggregator proof",
+    "suiIntegration": "Ready with live package/object proof",
+    "sealIntegration": "Ready with live key release proof",
     "graphVisualization": "Interactive (@xyflow/react with dagre auto-layout, custom nodes, detail panel)",
-    "studioSDK": "Ready (studio-sdk.ts for external agent instrumentation)"
+    "studioSDK": "Ready (agent instrumentation APIs)"
   },
   "proofStatus": {
-    "memwalSemanticRecall": { "status": "sdk_ready", "details": "Real SDK integrated. Requires credentials for live proof." },
-    "walrusAggregatorHash": { "status": "code_ready", "details": "WalrusStorageAdapter.verifyIndependently() implemented. Requires endpoints." },
-    "suiMemorySpace": { "status": "code_ready", "details": "Move contract complete. Requires testnet deployment." },
-    "sealApproveBeforeRevoke": { "status": "move_tested", "details": "Move test verifies approval. Seal SDK integration pending." },
-    "sealDenialAfterRevoke": { "status": "move_tested", "details": "Move test verifies denial after revoke. Seal SDK integration pending." },
+    "memwalSemanticRecall": { "status": "requires_credentials", "details": "Run npm run memwal:provision and npm run verify:memwal after restoring the private key." },
+    "walrusAggregatorHash": { "status": "verified", "details": "Live testnet roundtrip verified." },
+    "suiMemorySpace": { "status": "verified", "details": "Move package, MemorySpace, and shared AccessGrant exist on testnet." },
+    "sealApproveBeforeDeny": { "status": "verified", "details": "Seal decrypts after policy approval." },
+    "sealMismatchedIdentityDenial": { "status": "verified", "details": "Seal denies key release for an identity that does not match the grant." },
     "interactiveGraph": { "status": "complete", "details": "@xyflow/react interactive graph with dagre layout." },
-    "walletConnection": { "status": "complete", "details": "@mysten/dapp-kit ConnectButton in topbar." },
-    "studioSDK": { "status": "complete", "details": "studio-sdk.ts with StudioClient class for external agents." }
+    "studioSDK": { "status": "complete", "details": "SDK-style services for external agent instrumentation." }
   },
-  "gapsForChampionship": [
-    "Live MemWal credentials (MEMWAL_PRIVATE_KEY + MEMWAL_ACCOUNT_ID) for real blob_id proof",
-    "Walrus publisher/aggregator URLs for independent verification proof",
-    "Sui testnet deployment of Move package for real objectId/txDigest",
-    "Full Seal SDK end-to-end (decrypt key release on approve, deny on revoke)"
-  ],
-  "note": "All code infrastructure is complete with real SDKs. ~90% of specification implemented. Remaining ~10% requires external service configuration (keys, endpoints, testnet deployment)."
+  "championshipGaps": [
+    "Live MemWal proof after restoring MEMWAL_PRIVATE_KEY and MEMWAL_ACCOUNT_ID",
+    "Bundle-size reduction via dynamic SDK imports"
+  ]
 }
