@@ -37,4 +37,4 @@ Generated: 2026-06-15 15:34 Asia/Shanghai
 
 1. Code-split heavy SDK imports to reduce the current Vite bundle-size warning.
 2. Record a short demo showing the live Walrus blob, Sui objects, Seal decrypt proof, and MemWal proof.
-3. Tighten the final pitch around “real-only agent memory control room” and show the proof JSON files during judging.
+3. Tighten the final pitch around "real-only agent memory control room" and show the proof JSON files during judging.
